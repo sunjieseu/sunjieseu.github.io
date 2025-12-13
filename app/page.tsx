@@ -21,8 +21,6 @@ import {
 
 export default function HomePage() {
   const [activeSection, setActiveSection] = useState('about')
-  const [visitorCount, setVisitorCount] = useState<number | null>(null)
-  const [pageViews, setPageViews] = useState<number | null>(null)
 
   // 真实访客统计逻辑
   useEffect(() => {
@@ -318,24 +316,20 @@ export default function HomePage() {
                 </div>
                 <div className="text-center">
                   <div className="text-2xl font-bold text-gold mb-1 transition-all duration-500">
-                    {visitorCount !== null ? visitorCount.toLocaleString() : (
-                      <span className="animate-pulse">统计中...</span>
-                    )}
+                    50+
                   </div>
                   <div className="text-sm text-academic-gray flex items-center justify-center">
-                    <Eye className="w-3 h-3 mr-1" />
-                    访客数量
+                    <Award className="w-3 h-3 mr-1" />
+                    发明专利
                   </div>
                 </div>
                 <div className="text-center">
                   <div className="text-2xl font-bold text-gold mb-1 transition-all duration-500">
-                    {pageViews !== null ? pageViews.toLocaleString() : (
-                      <span className="animate-pulse">统计中...</span>
-                    )}
+                    20+
                   </div>
                   <div className="text-sm text-academic-gray flex items-center justify-center">
-                    <TrendingUp className="w-3 h-3 mr-1" />
-                    页面浏览
+                    <Briefcase className="w-3 h-3 mr-1" />
+                    合作企业
                   </div>
                 </div>
               </div>
@@ -533,30 +527,22 @@ export default function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div className="text-center">
               <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Eye className="w-8 h-8 text-white" />
+                <Award className="w-8 h-8 text-white" />
               </div>
-              <div className="text-3xl font-bold text-white mb-2 transition-all duration-700">
-                {visitorCount !== null ? (
-                  <span className="counter-animation">{visitorCount.toLocaleString()}</span>
-                ) : (
-                  <span className="animate-pulse">统计中...</span>
-                )}
+              <div className="text-3xl font-bold text-white mb-2">
+                50+
               </div>
-              <div className="text-blue-100">累计访客</div>
+              <div className="text-blue-100">发明专利</div>
             </div>
             
             <div className="text-center">
               <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                <TrendingUp className="w-8 h-8 text-white" />
+                <Briefcase className="w-8 h-8 text-white" />
               </div>
-              <div className="text-3xl font-bold text-white mb-2 transition-all duration-700">
-                {pageViews !== null ? (
-                  <span className="counter-animation">{pageViews.toLocaleString()}</span>
-                ) : (
-                  <span className="animate-pulse">统计中...</span>
-                )}
+              <div className="text-3xl font-bold text-white mb-2">
+                20+
               </div>
-              <div className="text-blue-100">页面浏览</div>
+              <div className="text-blue-100">合作企业</div>
             </div>
             
             <div className="text-center">
