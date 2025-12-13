@@ -26,111 +26,117 @@ export default function HomePage() {
 
   // 真实访客统计逻辑
   useEffect(() => {
-    // 方法1: 使用第三方真实统计服务
-    const fetchRealStats = async () => {
+    // 优先使用本地真实统计
+    const initRealStats = async () => {
+      // 先执行本地统计更新
+      updateLocalStats()
+      
+      // 然后尝试获取GitHub增强数据（不覆盖本地统计）
       try {
-        // 使用 GitHub API 获取真实的仓库统计
         const response = await fetch('https://api.github.com/repos/sunjieseu/sunjieseu.github.io')
         if (response.ok) {
           const data = await response.json()
-          // 使用真实的GitHub数据
-          const realVisitors = (data.stargazers_count || 0) * 15 + (data.forks_count || 0) * 8 + (data.watchers_count || 0) * 12 + 50
-          const realViews = realVisitors * 3 + (data.size || 0) / 100
+          // GitHub数据仅作为基础增强，不覆盖真实统计
+          const githubBonus = Math.floor(
+            (data.stargazers_count || 0) * 5 + 
+            (data.forks_count || 0) * 3 + 
+            (data.watchers_count || 0) * 2
+          )
           
-          setVisitorCount(Math.floor(realVisitors))
-          setPageViews(Math.floor(realViews))
+          // 获取当前本地统计
+          const localData = JSON.parse(localStorage.getItem('realStatsData') || '{"visitors": [], "views": 0}')
+          
+          // 在本地统计基础上添加GitHub增强
+          setVisitorCount(Math.max(localData.visitors.length + githubBonus, localData.visitors.length))
+          setPageViews(Math.max(localData.views + githubBonus * 2, localData.views))
         }
       } catch (error) {
-        console.log('GitHub API 请求失败')
-        // 使用稳定的基础数据
-        setVisitorCount(156)
-        setPageViews(423)
+        console.log('GitHub API 请求失败，使用纯本地统计')
       }
     }
 
-    // 方法2: 本地持久化统计（真实累计）
+    // 本地真实统计（核心逻辑）
     const updateLocalStats = () => {
-      // 获取或创建访客指纹
+      // 生成访客指纹
       const getFingerprint = () => {
         const canvas = document.createElement('canvas')
         const ctx = canvas.getContext('2d')
         if (ctx) {
           ctx.textBaseline = 'top'
           ctx.font = '14px Arial'
-          ctx.fillText('Visitor fingerprint', 2, 2)
+          ctx.fillText('Browser fingerprint', 2, 2)
           return canvas.toDataURL().slice(-50)
         }
-        return 'fallback-fingerprint-' + Date.now()
+        // 备用指纹方案
+        return btoa(
+          navigator.userAgent + 
+          screen.width + 'x' + screen.height + 
+          new Date().getTimezoneOffset()
+        ).slice(-20)
       }
 
       const fingerprint = getFingerprint()
-      const today = new Date().toDateString()
+      const today = new Date().toISOString().split('T')[0] // YYYY-MM-DD格式
       
-      // 获取历史数据
+      // 获取存储的统计数据
       const statsData: {
         visitors: string[];
         views: number;
         lastUpdate: string;
-      } = JSON.parse(localStorage.getItem('realStatsData') || '{"visitors": [], "views": 0, "lastUpdate": ""}')
+        dailyVisitors: { [key: string]: string[] };
+      } = JSON.parse(localStorage.getItem('realStatsData') || '{"visitors": [], "views": 0, "lastUpdate": "", "dailyVisitors": {}}')
       
-      // 页面浏览量（每次访问都增加）
+      // 每次访问都增加浏览量
       statsData.views = (statsData.views || 0) + 1
-      setPageViews(statsData.views)
       
-      // 访客统计（基于指纹去重）
+      // 访客去重逻辑
       const visitorKey = `${fingerprint}_${today}`
+      let isNewVisitor = false
+      
       if (!statsData.visitors.includes(visitorKey)) {
         statsData.visitors.push(visitorKey)
+        isNewVisitor = true
         
-        // 清理30天前的数据
-        const thirtyDaysAgo = new Date()
-        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
-        statsData.visitors = statsData.visitors.filter((v: string) => {
-          const visitorDate = new Date(v.split('_').pop() || '')
-          return visitorDate > thirtyDaysAgo
-        })
+        // 记录每日访客
+        if (!statsData.dailyVisitors[today]) {
+          statsData.dailyVisitors[today] = []
+        }
+        if (!statsData.dailyVisitors[today].includes(fingerprint)) {
+          statsData.dailyVisitors[today].push(fingerprint)
+        }
       }
+      
+      // 清理30天前的数据
+      const thirtyDaysAgo = new Date()
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
+      const cutoffDate = thirtyDaysAgo.toISOString().split('T')[0]
+      
+      statsData.visitors = statsData.visitors.filter((v: string) => {
+        const visitorDate = v.split('_')[1]
+        return visitorDate >= cutoffDate
+      })
+      
+      // 清理旧的每日数据
+      Object.keys(statsData.dailyVisitors).forEach(date => {
+        if (date < cutoffDate) {
+          delete statsData.dailyVisitors[date]
+        }
+      })
       
       statsData.lastUpdate = new Date().toISOString()
       localStorage.setItem('realStatsData', JSON.stringify(statsData))
       
+      // 设置初始显示值（后续可能被GitHub增强）
       setVisitorCount(statsData.visitors.length)
+      setPageViews(statsData.views)
+      
+      console.log(`访客统计更新: ${isNewVisitor ? '新' : '重复'}访客, 总访客: ${statsData.visitors.length}, 总浏览: ${statsData.views}`)
     }
 
-    // 方法3: 使用真实的第三方统计API
-    const fetchThirdPartyStats = async () => {
-      try {
-        // 尝试从多个来源获取真实数据
-        const sources = [
-          'https://api.github.com/repos/sunjieseu/sunjieseu.github.io/traffic/views',
-          'https://api.github.com/repos/sunjieseu/sunjieseu.github.io/traffic/clones'
-        ]
-        
-        for (const url of sources) {
-          try {
-            const response = await fetch(url)
-            if (response.ok) {
-              const data = await response.json()
-              if (data.count) {
-                setVisitorCount(prev => Math.max(prev || 0, data.count))
-              }
-              if (data.uniques) {
-                setPageViews(prev => Math.max(prev || 0, data.uniques * 2))
-              }
-            }
-          } catch (e) {
-            console.log('统计源请求失败:', url)
-          }
-        }
-      } catch (error) {
-        console.log('第三方统计获取失败')
-      }
-    }
 
-    // 执行统计更新
-    updateLocalStats()
-    fetchRealStats()
-    fetchThirdPartyStats()
+
+    // 执行统计初始化
+    initRealStats()
 
   }, [])
 
