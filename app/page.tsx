@@ -30,8 +30,7 @@ export default function HomePage() {
       const localStats = updateLocalStats()
       
       // 2. 立即设置基础显示值
-      setVisitorCount(localStats.visitorCount)
-      setPageViews(localStats.pageViews)
+      // 不再需要动态统计
       
       // 3. 异步获取GitHub增强数据
       try {
@@ -45,16 +44,11 @@ export default function HomePage() {
           )
           
           // 在本地统计基础上添加GitHub增强（如果有的话）
-          if (githubBonus > 0) {
-            setVisitorCount(localStats.visitorCount + githubBonus)
-            setPageViews(localStats.pageViews + githubBonus * 2)
-          }
+          // 不再需要动态统计
         }
       } catch (error) {
         console.log('GitHub API 请求失败，使用纯本地统计')
-        // 确保即使API失败也有显示值
-        setVisitorCount(localStats.visitorCount)
-        setPageViews(localStats.pageViews)
+        // 不再需要动态统计
       }
     }
 
