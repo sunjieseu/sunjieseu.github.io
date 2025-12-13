@@ -22,6 +22,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="zh-CN">
+      <head>
+        <meta name="baidu-site-verification" content="codeva-bqpfwaSrVq" />
+        <link rel="canonical" href="https://sunjieseu.github.io" />
+      </head>
       <body>{children}</body>
     </html>
   )
