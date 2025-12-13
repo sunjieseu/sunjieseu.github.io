@@ -67,7 +67,11 @@ export default function HomePage() {
       const today = new Date().toDateString()
       
       // 获取历史数据
-      const statsData = JSON.parse(localStorage.getItem('realStatsData') || '{"visitors": [], "views": 0, "lastUpdate": ""}')
+      const statsData: {
+        visitors: string[];
+        views: number;
+        lastUpdate: string;
+      } = JSON.parse(localStorage.getItem('realStatsData') || '{"visitors": [], "views": 0, "lastUpdate": ""}')
       
       // 页面浏览量（每次访问都增加）
       statsData.views = (statsData.views || 0) + 1
@@ -81,8 +85,8 @@ export default function HomePage() {
         // 清理30天前的数据
         const thirtyDaysAgo = new Date()
         thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
-        statsData.visitors = statsData.visitors.filter(v => {
-          const visitorDate = new Date(v.split('_').pop())
+        statsData.visitors = statsData.visitors.filter((v: string) => {
+          const visitorDate = new Date(v.split('_').pop() || '')
           return visitorDate > thirtyDaysAgo
         })
       }
