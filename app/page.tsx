@@ -26,37 +26,43 @@ export default function HomePage() {
 
   // 真实访客统计逻辑
   useEffect(() => {
-    // 优先使用本地真实统计
+    // 初始化统计系统
     const initRealStats = async () => {
-      // 先执行本地统计更新
-      updateLocalStats()
+      // 1. 先执行本地统计更新（同步）
+      const localStats = updateLocalStats()
       
-      // 然后尝试获取GitHub增强数据（不覆盖本地统计）
+      // 2. 立即设置基础显示值
+      setVisitorCount(localStats.visitorCount)
+      setPageViews(localStats.pageViews)
+      
+      // 3. 异步获取GitHub增强数据
       try {
         const response = await fetch('https://api.github.com/repos/sunjieseu/sunjieseu.github.io')
         if (response.ok) {
           const data = await response.json()
-          // GitHub数据仅作为基础增强，不覆盖真实统计
           const githubBonus = Math.floor(
-            (data.stargazers_count || 0) * 5 + 
-            (data.forks_count || 0) * 3 + 
-            (data.watchers_count || 0) * 2
+            (data.stargazers_count || 0) * 3 + 
+            (data.forks_count || 0) * 2 + 
+            (data.watchers_count || 0) * 1
           )
           
-          // 获取当前本地统计
-          const localData = JSON.parse(localStorage.getItem('realStatsData') || '{"visitors": [], "views": 0}')
-          
-          // 在本地统计基础上添加GitHub增强
-          setVisitorCount(Math.max(localData.visitors.length + githubBonus, localData.visitors.length))
-          setPageViews(Math.max(localData.views + githubBonus * 2, localData.views))
+          // 在本地统计基础上添加GitHub增强（如果有的话）
+          if (githubBonus > 0) {
+            setVisitorCount(localStats.visitorCount + githubBonus)
+            setPageViews(localStats.pageViews + githubBonus * 2)
+          }
         }
       } catch (error) {
         console.log('GitHub API 请求失败，使用纯本地统计')
+        // 确保即使API失败也有显示值
+        setVisitorCount(localStats.visitorCount)
+        setPageViews(localStats.pageViews)
       }
     }
 
     // 本地真实统计（核心逻辑）
     const updateLocalStats = () => {
+      try {
       // 生成访客指纹
       const getFingerprint = () => {
         const canvas = document.createElement('canvas')
@@ -123,14 +129,25 @@ export default function HomePage() {
         }
       })
       
-      statsData.lastUpdate = new Date().toISOString()
-      localStorage.setItem('realStatsData', JSON.stringify(statsData))
-      
-      // 设置初始显示值（后续可能被GitHub增强）
-      setVisitorCount(statsData.visitors.length)
-      setPageViews(statsData.views)
-      
-      console.log(`访客统计更新: ${isNewVisitor ? '新' : '重复'}访客, 总访客: ${statsData.visitors.length}, 总浏览: ${statsData.views}`)
+        statsData.lastUpdate = new Date().toISOString()
+        localStorage.setItem('realStatsData', JSON.stringify(statsData))
+        
+        const result = {
+          visitorCount: statsData.visitors.length,
+          pageViews: statsData.views
+        }
+        
+        console.log(`访客统计更新: ${isNewVisitor ? '新' : '重复'}访客, 总访客: ${result.visitorCount}, 总浏览: ${result.pageViews}`)
+        
+        return result
+      } catch (error) {
+        console.error('本地统计更新失败:', error)
+        // 返回默认值
+        return {
+          visitorCount: 1,
+          pageViews: 1
+        }
+      }
     }
 
 
