@@ -55,3 +55,27 @@ a {
 .academic-border {
   border-left: 4px solid #d4af37;
 }
+
+.counter-animation {
+  display: inline-block;
+  transition: all 0.7s ease-in-out;
+}
+
+.counter-animation:hover {
+  transform: scale(1.05);
+}
+
+@keyframes countUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-count-up {
+  animation: countUp 0.7s ease-out;
+}
