@@ -54,10 +54,13 @@ export default function HomePage() {
       const getFingerprint = () => {
         const canvas = document.createElement('canvas')
         const ctx = canvas.getContext('2d')
-        ctx.textBaseline = 'top'
-        ctx.font = '14px Arial'
-        ctx.fillText('Visitor fingerprint', 2, 2)
-        return canvas.toDataURL().slice(-50)
+        if (ctx) {
+          ctx.textBaseline = 'top'
+          ctx.font = '14px Arial'
+          ctx.fillText('Visitor fingerprint', 2, 2)
+          return canvas.toDataURL().slice(-50)
+        }
+        return 'fallback-fingerprint-' + Date.now()
       }
 
       const fingerprint = getFingerprint()
