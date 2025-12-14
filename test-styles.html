@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>样式测试</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'academic-blue': '#1e3a8a',
+                        'academic-navy': '#0f172a',
+                        'academic-gray': '#374151',
+                        'academic-light': '#f8fafc',
+                        'gold': '#d4af37',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .academic-card {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            transition: all 0.3s ease;
+        }
+        .academic-card:hover {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            transform: translateY(-2px);
+        }
+        .serif-heading {
+            font-family: 'Crimson Text', Georgia, serif;
+        }
+        .academic-border {
+            border-left: 4px solid #d4af37;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-academic-light via-white to-blue-50">
+    <div class="min-h-screen p-8">
+        <h1 class="text-4xl font-bold text-academic-navy mb-8 serif-heading text-center">
+            个人主页样式测试
+        </h1>
+        
+        <div class="max-w-4xl mx-auto space-y-6">
+            <!-- 测试卡片 -->
+            <div class="academic-card bg-white rounded-xl p-6 academic-border">
+                <h2 class="text-2xl font-semibold text-academic-navy mb-4">测试卡片</h2>
+                <p class="text-academic-gray">这是一个测试卡片，用于验证样式是否正确加载。</p>
+            </div>
+            
+            <!-- 颜色测试 -->
+            <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+                <div class="bg-academic-blue text-white p-4 rounded-lg text-center">
+                    <div class="text-sm">academic-blue</div>
+                    <div class="text-xs">#1e3a8a</div>
+                </div>
+                <div class="bg-academic-navy text-white p-4 rounded-lg text-center">
+                    <div class="text-sm">academic-navy</div>
+                    <div class="text-xs">#0f172a</div>
+                </div>
+                <div class="bg-academic-gray text-white p-4 rounded-lg text-center">
+                    <div class="text-sm">academic-gray</div>
+                    <div class="text-xs">#374151</div>
+                </div>
+                <div class="bg-academic-light text-academic-navy p-4 rounded-lg text-center border">
+                    <div class="text-sm">academic-light</div>
+                    <div class="text-xs">#f8fafc</div>
+                </div>
+                <div class="bg-gold text-white p-4 rounded-lg text-center">
+                    <div class="text-sm">gold</div>
+                    <div class="text-xs">#d4af37</div>
+                </div>
+            </div>
+            
+            <!-- 按钮测试 -->
+            <div class="flex gap-4 justify-center">
+                <button class="bg-academic-blue text-white px-6 py-3 rounded-lg hover:bg-blue-800 transition-colors">
+                    主要按钮
+                </button>
+                <button class="border-2 border-academic-blue text-academic-blue px-6 py-3 rounded-lg hover:bg-academic-blue hover:text-white transition-colors">
+                    次要按钮
+                </button>
+            </div>
+            
+            <!-- 状态指示 -->
+            <div class="text-center">
+                <div id="status" class="text-lg font-semibold"></div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // 检查样式是否正确加载
+        const statusEl = document.getElementById('status');
+        const testEl = document.querySelector('.bg-academic-blue');
+        
+        if (testEl) {
+            const computedStyle = window.getComputedStyle(testEl);
+            const bgColor = computedStyle.backgroundColor;
+            
+            if (bgColor === 'rgb(30, 58, 138)' || bgColor.includes('30') && bgColor.includes('58') && bgColor.includes('138')) {
+                statusEl.textContent = '✅ 样式加载正常';
+                statusEl.className = 'text-lg font-semibold text-green-600';
+            } else {
+                statusEl.textContent = '❌ 样式加载异常';
+                statusEl.className = 'text-lg font-semibold text-red-600';
+            }
+        } else {
+            statusEl.textContent = '❌ 元素未找到';
+            statusEl.className = 'text-lg font-semibold text-red-600';
+        }
+    </script>
+</body>
+</html>
