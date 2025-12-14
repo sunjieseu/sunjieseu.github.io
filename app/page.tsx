@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { 
   GraduationCap, 
   BookOpen, 
@@ -55,72 +55,72 @@ export default function HomePage() {
     // 本地真实统计（核心逻辑）
     const updateLocalStats = () => {
       try {
-      // 生成访客指纹
-      const getFingerprint = () => {
-        const canvas = document.createElement('canvas')
-        const ctx = canvas.getContext('2d')
-        if (ctx) {
-          ctx.textBaseline = 'top'
-          ctx.font = '14px Arial'
-          ctx.fillText('Browser fingerprint', 2, 2)
-          return canvas.toDataURL().slice(-50)
+        // 生成访客指纹
+        const getFingerprint = () => {
+          const canvas = document.createElement('canvas')
+          const ctx = canvas.getContext('2d')
+          if (ctx) {
+            ctx.textBaseline = 'top'
+            ctx.font = '14px Arial'
+            ctx.fillText('Browser fingerprint', 2, 2)
+            return canvas.toDataURL().slice(-50)
+          }
+          // 备用指纹方案
+          return btoa(
+            navigator.userAgent + 
+            screen.width + 'x' + screen.height + 
+            new Date().getTimezoneOffset()
+          ).slice(-20)
         }
-        // 备用指纹方案
-        return btoa(
-          navigator.userAgent + 
-          screen.width + 'x' + screen.height + 
-          new Date().getTimezoneOffset()
-        ).slice(-20)
-      }
 
-      const fingerprint = getFingerprint()
-      const today = new Date().toISOString().split('T')[0] // YYYY-MM-DD格式
-      
-      // 获取存储的统计数据
-      const statsData: {
-        visitors: string[];
-        views: number;
-        lastUpdate: string;
-        dailyVisitors: { [key: string]: string[] };
-      } = JSON.parse(localStorage.getItem('realStatsData') || '{"visitors": [], "views": 0, "lastUpdate": "", "dailyVisitors": {}}')
-      
-      // 每次访问都增加浏览量
-      statsData.views = (statsData.views || 0) + 1
-      
-      // 访客去重逻辑
-      const visitorKey = `${fingerprint}_${today}`
-      let isNewVisitor = false
-      
-      if (!statsData.visitors.includes(visitorKey)) {
-        statsData.visitors.push(visitorKey)
-        isNewVisitor = true
+        const fingerprint = getFingerprint()
+        const today = new Date().toISOString().split('T')[0] // YYYY-MM-DD格式
         
-        // 记录每日访客
-        if (!statsData.dailyVisitors[today]) {
-          statsData.dailyVisitors[today] = []
+        // 获取存储的统计数据
+        const statsData: {
+          visitors: string[];
+          views: number;
+          lastUpdate: string;
+          dailyVisitors: { [key: string]: string[] };
+        } = JSON.parse(localStorage.getItem('realStatsData') || '{"visitors": [], "views": 0, "lastUpdate": "", "dailyVisitors": {}}')
+        
+        // 每次访问都增加浏览量
+        statsData.views = (statsData.views || 0) + 1
+        
+        // 访客去重逻辑
+        const visitorKey = `${fingerprint}_${today}`
+        let isNewVisitor = false
+        
+        if (!statsData.visitors.includes(visitorKey)) {
+          statsData.visitors.push(visitorKey)
+          isNewVisitor = true
+          
+          // 记录每日访客
+          if (!statsData.dailyVisitors[today]) {
+            statsData.dailyVisitors[today] = []
+          }
+          if (!statsData.dailyVisitors[today].includes(fingerprint)) {
+            statsData.dailyVisitors[today].push(fingerprint)
+          }
         }
-        if (!statsData.dailyVisitors[today].includes(fingerprint)) {
-          statsData.dailyVisitors[today].push(fingerprint)
-        }
-      }
-      
-      // 清理30天前的数据
-      const thirtyDaysAgo = new Date()
-      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
-      const cutoffDate = thirtyDaysAgo.toISOString().split('T')[0]
-      
-      statsData.visitors = statsData.visitors.filter((v: string) => {
-        const visitorDate = v.split('_')[1]
-        return visitorDate >= cutoffDate
-      })
-      
-      // 清理旧的每日数据
-      Object.keys(statsData.dailyVisitors).forEach(date => {
-        if (date < cutoffDate) {
-          delete statsData.dailyVisitors[date]
-        }
-      })
-      
+        
+        // 清理30天前的数据
+        const thirtyDaysAgo = new Date()
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
+        const cutoffDate = thirtyDaysAgo.toISOString().split('T')[0]
+        
+        statsData.visitors = statsData.visitors.filter((v: string) => {
+          const visitorDate = v.split('_')[1]
+          return visitorDate >= cutoffDate
+        })
+        
+        // 清理旧的每日数据
+        Object.keys(statsData.dailyVisitors).forEach(date => {
+          if (date < cutoffDate) {
+            delete statsData.dailyVisitors[date]
+          }
+        })
+        
         statsData.lastUpdate = new Date().toISOString()
         localStorage.setItem('realStatsData', JSON.stringify(statsData))
         
