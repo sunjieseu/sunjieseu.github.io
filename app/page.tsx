@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { 
   GraduationCap, 
   BookOpen, 
@@ -24,34 +24,6 @@ export default function HomePage() {
 
   // 真实访客统计逻辑
   useEffect(() => {
-    // 初始化统计系统
-    const initRealStats = async () => {
-      // 1. 先执行本地统计更新（同步）
-      const localStats = updateLocalStats()
-      
-      // 2. 立即设置基础显示值
-      // 不再需要动态统计
-      
-      // 3. 异步获取GitHub增强数据
-      try {
-        const response = await fetch('https://api.github.com/repos/sunjieseu/sunjieseu.github.io')
-        if (response.ok) {
-          const data = await response.json()
-          const githubBonus = Math.floor(
-            (data.stargazers_count || 0) * 3 + 
-            (data.forks_count || 0) * 2 + 
-            (data.watchers_count || 0) * 1
-          )
-          
-          // 在本地统计基础上添加GitHub增强（如果有的话）
-          // 不再需要动态统计
-        }
-      } catch (error) {
-        console.log('GitHub API 请求失败，使用纯本地统计')
-        // 不再需要动态统计
-      }
-    }
-
     // 本地真实统计（核心逻辑）
     const updateLocalStats = () => {
       try {
@@ -142,7 +114,33 @@ export default function HomePage() {
       }
     }
 
-
+    // 初始化统计系统
+    const initRealStats = async () => {
+      // 1. 先执行本地统计更新（同步）
+      const localStats = updateLocalStats()
+      
+      // 2. 立即设置基础显示值
+      // 不再需要动态统计
+      
+      // 3. 异步获取GitHub增强数据
+      try {
+        const response = await fetch('https://api.github.com/repos/sunjieseu/sunjieseu.github.io')
+        if (response.ok) {
+          const data = await response.json()
+          const githubBonus = Math.floor(
+            (data.stargazers_count || 0) * 3 + 
+            (data.forks_count || 0) * 2 + 
+            (data.watchers_count || 0) * 1
+          )
+          
+          // 在本地统计基础上添加GitHub增强（如果有的话）
+          // 不再需要动态统计
+        }
+      } catch (error) {
+        console.log('GitHub API 请求失败，使用纯本地统计')
+        // 不再需要动态统计
+      }
+    }
 
     // 执行统计初始化
     initRealStats()
